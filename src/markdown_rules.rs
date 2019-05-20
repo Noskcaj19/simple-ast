@@ -51,7 +51,7 @@ lazy_static! {
     // Additional Discord rules
     static ref INLINE_CODE: Regex = Regex::new(r"^`([\s\S]+?)`").unwrap();
     static ref CODE: Regex = Regex::with_options(
-        r"^```(([^\n]+)?(?:\n)(.+?))```",
+        r"^```(([^\n]+(?:\n))?(.+?))```",
         onig::RegexOptions::REGEX_OPTION_MULTILINE,
         onig::Syntax::default(),
     ).unwrap();
