@@ -191,7 +191,7 @@ impl Rule<MarkdownNode> for InlineCode {
 impl Rule<MarkdownNode> for Code {
     fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
-        let language = captures.at(2).unwrap();
+        let language = captures.at(2).unwrap_or("");
         let text = captures.at(3).unwrap();
         ParseSpec::create_terminal(
             Some(MarkdownNode::Code(language.to_owned(), text.to_owned())),
