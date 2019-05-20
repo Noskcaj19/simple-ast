@@ -3,14 +3,14 @@ use std::rc::Rc;
 use std::sync::{RwLock, RwLockWriteGuard};
 
 pub struct Parser<'r, T: Node<T>> {
-    rules: Vec<&'r Rule<T>>,
+    rules: &'r [&'r Rule<T>],
 }
 
 #[derive(Debug)]
 pub struct Styled<T: Node<T>>(pub Vec<Rc<RwLock<T>>>);
 
 impl<'r, T: Node<T>> Parser<'r, T> {
-    pub fn with_rules(rules: Vec<&'r Rule<T>>) -> Parser<'r, T> {
+    pub fn with_rules(rules: &'r [&'r Rule<T>]) -> Parser<'r, T> {
         Parser { rules }
     }
 
@@ -34,7 +34,7 @@ impl<'r, T: Node<T>> Parser<'r, T> {
             let inspection_source = &src[builder.start_index..builder.end_index];
             let offset = builder.start_index;
 
-            for rule in &self.rules {
+            for rule in self.rules {
                 let captures = rule.captures(inspection_source);
                 if let Some(matcher) = captures {
                     let matcher_source_end = matcher.pos(0).unwrap().1 + offset;

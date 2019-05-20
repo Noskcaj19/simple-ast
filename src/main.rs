@@ -3,7 +3,7 @@ use simple_ast::{MarkdownNode, Parser, Rule};
 use simple_ast::markdown_rules::*;
 
 fn main() {
-    let rules: Vec<&Rule<MarkdownNode>> = vec![
+    let rules: &[&Rule<MarkdownNode>] = &[
         &Escape,
         &Newline,
         &Bold,
