@@ -3,17 +3,17 @@ use simple_ast::{MarkdownNode, Parser, Rule};
 use simple_ast::markdown_rules::*;
 
 fn main() {
-    let rules: Vec<Box<dyn Rule<MarkdownNode>>> = vec![
-        Box::new(Escape),
-        Box::new(Newline),
-        Box::new(Bold),
-        Box::new(Underline),
-        Box::new(Italic),
-        Box::new(Strikethrough),
-        Box::new(Spoiler),
-        Box::new(Code),
-        Box::new(InlineCode),
-        Box::new(Text),
+    let rules: Vec<&Rule<MarkdownNode>> = vec![
+        &Escape,
+        &Newline,
+        &Bold,
+        &Underline,
+        &Italic,
+        &Strikethrough,
+        &Spoiler,
+        &Code,
+        &InlineCode,
+        &Text,
     ];
 
     let parser = Parser::with_rules(rules);

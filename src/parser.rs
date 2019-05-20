@@ -2,15 +2,15 @@ use crate::{Node, ParseSpec, Rule};
 use std::rc::Rc;
 use std::sync::{RwLock, RwLockWriteGuard};
 
-pub struct Parser<T: Node<T>> {
-    rules: Vec<Box<Rule<T>>>,
+pub struct Parser<'r, T: Node<T>> {
+    rules: Vec<&'r Rule<T>>,
 }
 
 #[derive(Debug)]
 pub struct Styled<T: Node<T>>(pub Vec<Rc<RwLock<T>>>);
 
-impl<T: Node<T>> Parser<T> {
-    pub fn with_rules(rules: Vec<Box<Rule<T>>>) -> Parser<T> {
+impl<'r, T: Node<T>> Parser<'r, T> {
+    pub fn with_rules(rules: Vec<&'r Rule<T>>) -> Parser<'r, T> {
         Parser { rules }
     }
 
