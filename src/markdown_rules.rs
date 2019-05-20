@@ -62,8 +62,8 @@ lazy_static! {
     ).unwrap();
 }
 
-impl Rule for Escape {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Escape {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         let text = captures.at(1).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::Text(text.to_owned())), start, end)
@@ -78,8 +78,8 @@ impl Rule for Escape {
     }
 }
 
-impl Rule for Newline {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Newline {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(0).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::Text("\n".to_owned())), start, end)
     }
@@ -93,8 +93,8 @@ impl Rule for Newline {
     }
 }
 
-impl Rule for Bold {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Bold {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Bold(Vec::new())), start, end)
     }
@@ -108,8 +108,8 @@ impl Rule for Bold {
     }
 }
 
-impl Rule for Underline {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Underline {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Underline(vec![])), start, end)
     }
@@ -123,8 +123,8 @@ impl Rule for Underline {
     }
 }
 
-impl Rule for Italic {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Italic {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = match captures.pos(1) {
             Some(pos) => pos,
             None => captures.pos(2).unwrap(),
@@ -141,8 +141,8 @@ impl Rule for Italic {
     }
 }
 
-impl Rule for Strikethrough {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Strikethrough {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Strikethrough(vec![])), start, end)
     }
@@ -156,8 +156,8 @@ impl Rule for Strikethrough {
     }
 }
 
-impl Rule for Text {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Text {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(0).unwrap();
         let text = captures.at(0).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::Text(text.to_owned())), start, end)
@@ -172,8 +172,8 @@ impl Rule for Text {
     }
 }
 
-impl Rule for InlineCode {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for InlineCode {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         let text = captures.at(1).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::InlineCode(text.to_owned())), start, end)
@@ -188,8 +188,8 @@ impl Rule for InlineCode {
     }
 }
 
-impl Rule for Code {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Code {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         let language = captures.at(2).unwrap();
         let text = captures.at(3).unwrap();
@@ -209,8 +209,8 @@ impl Rule for Code {
     }
 }
 
-impl Rule for Spoiler {
-    fn parse(&self, captures: Captures) -> ParseSpec {
+impl Rule<MarkdownNode> for Spoiler {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Spoiler(Vec::new())), start, end)
     }

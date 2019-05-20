@@ -3,9 +3,9 @@ use std::{rc::Rc, sync::RwLock};
 
 type NodeType = Rc<RwLock<MarkdownNode>>;
 
-pub trait Node {
-    fn get_children(&self) -> Option<&[NodeType]>;
-    fn add_child(&mut self, child: NodeType);
+pub trait Node<T> {
+    fn get_children(&self) -> Option<&[Rc<RwLock<T>>]>;
+    fn add_child(&mut self, child: Rc<RwLock<T>>);
 }
 
 #[derive(Debug, Clone)]
@@ -20,7 +20,7 @@ pub enum MarkdownNode {
     Spoiler(Vec<NodeType>),
 }
 
-impl Node for MarkdownNode {
+impl Node<MarkdownNode> for MarkdownNode {
     fn get_children(&self) -> Option<&[NodeType]> {
         match self {
             MarkdownNode::Italic(children) => Some(children),
@@ -48,7 +48,7 @@ impl Node for MarkdownNode {
     }
 }
 
-impl Styled {
+impl Styled<MarkdownNode> {
     pub fn as_markdown(&self) -> String {
         self.0
             .iter()

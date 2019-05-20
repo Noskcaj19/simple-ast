@@ -1,9 +1,9 @@
-use simple_ast::{Parser, Rule};
+use simple_ast::{MarkdownNode, Parser, Rule};
 
 use simple_ast::markdown_rules::*;
 
 fn main() {
-    let rules: Vec<Box<dyn Rule>> = vec![
+    let rules: Vec<Box<dyn Rule<MarkdownNode>>> = vec![
         Box::new(Escape),
         Box::new(Newline),
         Box::new(Bold),
@@ -15,6 +15,7 @@ fn main() {
         Box::new(InlineCode),
         Box::new(Text),
     ];
+
     let parser = Parser::with_rules(rules);
     let i = "_fooff_ **bar _foo_**";
     let result = parser.parse(i);

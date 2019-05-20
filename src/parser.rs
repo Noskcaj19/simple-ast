@@ -1,22 +1,22 @@
-use crate::{MarkdownNode, Node, ParseSpec, Rule};
+use crate::{Node, ParseSpec, Rule};
 use std::rc::Rc;
-use std::sync::RwLock;
+use std::sync::{RwLock, RwLockWriteGuard};
 
-pub struct Parser {
-    rules: Vec<Box<Rule>>,
+pub struct Parser<T: Node<T>> {
+    rules: Vec<Box<Rule<T>>>,
 }
 
 #[derive(Debug)]
-pub struct Styled(pub Vec<Rc<RwLock<MarkdownNode>>>);
+pub struct Styled<T: Node<T>>(pub Vec<Rc<RwLock<T>>>);
 
-impl Parser {
-    pub fn with_rules(rules: Vec<Box<Rule>>) -> Parser {
+impl<T: Node<T>> Parser<T> {
+    pub fn with_rules(rules: Vec<Box<Rule<T>>>) -> Parser<T> {
         Parser { rules }
     }
 
-    pub fn parse(&self, src: &str) -> Styled {
+    pub fn parse(&self, src: &str) -> Styled<T> {
         let mut remaining_parses = Vec::new();
-        let mut top_level_nodes: Vec<Rc<RwLock<MarkdownNode>>> = Vec::new();
+        let mut top_level_nodes: Vec<Rc<RwLock<T>>> = Vec::new();
 
         if !src.is_empty() {
             remaining_parses.push(ParseSpec::create_nonterminal(None, 0, src.len()));
@@ -44,7 +44,8 @@ impl Parser {
 
                     if let Some(it) = new_builder.root.clone() {
                         if let Some(ref mut parent) = parent {
-                            parent.write().unwrap().add_child(it)
+                            let mut parent: RwLockWriteGuard<T> = parent.write().unwrap();
+                            parent.add_child(it)
                         } else {
                             top_level_nodes.push(it)
                         }
