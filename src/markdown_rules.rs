@@ -49,17 +49,11 @@ lazy_static! {
             .unwrap();
 
     // Additional Discord rules
-    static ref INLINE_CODE: Regex = Regex::new(r"^`([\s\S]+?)`").unwrap();
-    static ref CODE: Regex = Regex::with_options(
-        r"^```(([^\n]+(?:\n))?(.+?))```",
-        onig::RegexOptions::REGEX_OPTION_MULTILINE,
-        onig::Syntax::default(),
+    static ref INLINE_CODE: Regex = Regex::new(r"^(`+)(\s*([\s\S]*?[^`])\s*)\1(?!`)").unwrap();
+    static ref CODE: Regex = Regex::new(
+        r"^(`{3,})( *(\S+)? *\n([\s\S]+?)\s*)\1 *",
     ).unwrap();
-    static ref SPOILER: Regex = Regex::with_options(
-        r"^\|\|(.+?)\|\|",
-        onig::RegexOptions::REGEX_OPTION_MULTILINE,
-        onig::Syntax::default(),
-    ).unwrap();
+    static ref SPOILER: Regex = Regex::new(r"^\|\|([\s\S]+?)\|\|").unwrap();
 }
 
 impl Rule<MarkdownNode> for Escape {
@@ -174,8 +168,8 @@ impl Rule<MarkdownNode> for Text {
 
 impl Rule<MarkdownNode> for InlineCode {
     fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
-        let (start, end) = captures.pos(1).unwrap();
-        let text = captures.at(1).unwrap();
+        let (start, end) = captures.pos(2).unwrap();
+        let text = captures.at(3).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::InlineCode(text.to_owned())), start, end)
     }
 
@@ -190,9 +184,9 @@ impl Rule<MarkdownNode> for InlineCode {
 
 impl Rule<MarkdownNode> for Code {
     fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
-        let (start, end) = captures.pos(1).unwrap();
-        let language = captures.at(2).unwrap_or("");
-        let text = captures.at(3).unwrap();
+        let (start, end) = captures.pos(2).unwrap();
+        let language = captures.at(3).unwrap_or("");
+        let text = captures.at(4).unwrap();
         ParseSpec::create_terminal(
             Some(MarkdownNode::Code(language.to_owned(), text.to_owned())),
             start,
