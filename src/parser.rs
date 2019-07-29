@@ -3,14 +3,14 @@ use std::rc::Rc;
 use std::sync::{RwLock, RwLockWriteGuard};
 
 pub struct Parser<'r, T: Node<T>> {
-    rules: &'r [&'r Rule<T>],
+    rules: &'r [&'r dyn Rule<T>],
 }
 
 #[derive(Debug)]
 pub struct Styled<T: Node<T>>(pub Vec<Rc<RwLock<T>>>);
 
 impl<'r, T: Node<T>> Parser<'r, T> {
-    pub fn with_rules(rules: &'r [&'r Rule<T>]) -> Parser<'r, T> {
+    pub fn with_rules(rules: &'r [&'r dyn Rule<T>]) -> Parser<'r, T> {
         Parser { rules }
     }
 

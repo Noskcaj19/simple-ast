@@ -1,6 +1,6 @@
+use crate::regex::{Captures, Regex};
 use crate::{MarkdownNode, ParseSpec, Rule};
 use lazy_static::lazy_static;
-use onig::{Captures, Regex};
 
 macro_rules! styles {
     ( $( $style:ident ),* $(,)? ) => {
@@ -45,7 +45,7 @@ lazy_static! {
     )).unwrap();
     static ref STRIKETHROUGH: Regex = Regex::new(r"^~~(?=\S)([\s\S]*?\S)~~").unwrap();
     static ref TEXT: Regex =
-        Regex::new(r"^[\s\S]+?(?=[^0-9A-Za-z\s\u00c0-\uffff]|\n| {2,}\n|\w+:\S|$)")
+        Regex::new(r"^[\s\S]+?(?=[^0-9A-Za-z\s\x00c0-\xffff]|\n| {2,}\n|\w+:\S|$)")
             .unwrap();
 
     // Additional Discord rules

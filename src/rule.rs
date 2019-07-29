@@ -1,5 +1,5 @@
+use crate::regex::Captures;
 use crate::Node;
-use onig::Captures;
 
 pub trait Rule<T: Node<T>> {
     fn parse(&self, captures: Captures) -> crate::ParseSpec<T>;
