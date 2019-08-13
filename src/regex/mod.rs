@@ -1,7 +1,7 @@
 #[cfg(not(feature = "pcre"))]
-type Error = oniguruma::Error;
+pub type Error = oniguruma::Error;
 #[cfg(feature = "pcre")]
-type Error = pcre2::Error;
+pub type Error = pcre2::Error;
 
 pub struct Regex {
     #[cfg(not(feature = "pcre"))]

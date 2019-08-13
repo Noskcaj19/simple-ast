@@ -1,5 +1,5 @@
 mod node;
-mod regex;
+pub mod regex;
 pub use node::{MarkdownNode, Node};
 mod parse_spec;
 pub use parse_spec::ParseSpec;
