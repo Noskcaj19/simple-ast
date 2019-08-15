@@ -45,7 +45,7 @@ lazy_static! {
     )).unwrap();
     static ref STRIKETHROUGH: Regex = Regex::new(r"^~~(?=\S)([\s\S]*?\S)~~").unwrap();
     static ref TEXT: Regex =
-        Regex::new(r"^[\s\S]+?(?=[^0-9A-Za-z\s\x00c0-\xffff]|\n| {2,}\n|\w+:\S|$)")
+        Regex::new(r"^[\s\S]+?(?=[^0-9A-Za-z\s\x{00c0}-\x{ffff}]|\n| {2,}\n|\w+:\S|$)")
             .unwrap();
 
     // Additional Discord rules

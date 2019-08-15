@@ -16,7 +16,7 @@ impl Regex {
         #[cfg(not(feature = "pcre"))]
         let regex = oniguruma::Regex::new(pattern);
         #[cfg(feature = "pcre")]
-        let regex = pcre2::bytes::Regex::new(pattern);
+        let regex = pcre2::bytes::RegexBuilder::new().utf(true).build(pattern);
 
         regex.map(|regex| Regex { inner: regex })
     }
