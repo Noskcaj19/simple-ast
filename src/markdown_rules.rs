@@ -30,20 +30,20 @@ lazy_static! {
         Regex::new(r"^\*\*([\s\S]+?)\*\*(?!\*)").unwrap();
     static ref UNDERLINE: Regex = Regex::new(r"^__([\s\S]+?)__(?!_)").unwrap();
     static ref ITALICS: Regex = Regex::new(concat!(
-        "^\\b_" , "((?:__|\\\\[\\s\\S]|[^\\\\_])+?)_" , "\\b",
-        "|" ,
+        "^\\b_", "((?:__|\\\\[\\s\\S]|[^\\\\_])+?)_", "\\b",
+        "|",
         // Or match *s that are followed by a non-space:
-        "^\\*(?=\\S)(" ,
+        "^\\*(?=\\S)(",
         // Match any of:
         //  - `**`: so that bolds inside italics don't close the
         // italics
         //  - whitespace
         //  - non-whitespace, non-* characters
-        "(?:\\*\\*|\\s+(?:[^*\\s]|\\*\\*)|[^\\s*])+?" ,
+        "(?:\\*\\*|\\s+(?:[^*\\s]|\\*\\*)|[^\\s*])+?",
         // followed by a non-space, non-* then *
         ")\\*(?!\\*)"
     )).unwrap();
-    static ref STRIKETHROUGH: Regex = Regex::new(r"^~~(?=\S)([\s\S]*?\S)~~").unwrap();
+    static ref STRIKETHROUGH: Regex = Regex::new(r"^~~([\s\S]+?)~~(?!_)").unwrap();
     static ref TEXT: Regex =
         Regex::new(r"^[\s\S]+?(?=[^0-9A-Za-z\s\x{00c0}-\x{ffff}]|\n| {2,}\n|\w+:\S|$)")
             .unwrap();
@@ -51,7 +51,7 @@ lazy_static! {
     // Additional Discord rules
     static ref INLINE_CODE: Regex = Regex::new(r"^(`+)(\s*([\s\S]*?[^`])\s*)\1(?!`)").unwrap();
     static ref CODE: Regex = Regex::new(
-        r"^(`{3,})( *(\S+)? *\n([\s\S]+?)\s*)\1 *",
+        r"^```((([A-z0-9-]+?)\n+)?\n*([\S\s]+?)\n*)```",
     ).unwrap();
     static ref SPOILER: Regex = Regex::new(r"^\|\|([\s\S]+?)\|\|").unwrap();
 }
@@ -184,7 +184,7 @@ impl Rule<MarkdownNode> for InlineCode {
 
 impl Rule<MarkdownNode> for Code {
     fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
-        let (start, end) = captures.pos(2).unwrap();
+        let (start, end) = captures.pos(1).unwrap();
         let language = captures.at(3).unwrap_or("");
         let text = captures.at(4).unwrap();
         ParseSpec::create_terminal(
