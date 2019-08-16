@@ -21,6 +21,7 @@ styles! {
     InlineCode,
     Code,
     Spoiler,
+    BlockQuote,
 }
 
 lazy_static! {
@@ -54,6 +55,7 @@ lazy_static! {
         r"^```((([A-z0-9-]+?)\n+)?\n*([\S\s]+?)\n*)```",
     ).unwrap();
     static ref SPOILER: Regex = Regex::new(r"^\|\|([\s\S]+?)\|\|").unwrap();
+    static ref BLOCK_QUOTE: Regex = Regex::new(r"^( *>>> +([\s\S]*))|^( *>(?!>>) +([^\n]*(\n *>(?!>>) +[^\n]*)*\n?))").unwrap();
 }
 
 impl Rule<MarkdownNode> for Escape {
@@ -215,5 +217,34 @@ impl Rule<MarkdownNode> for Spoiler {
 
     fn name(&self) -> String {
         "Spoiler".to_owned()
+    }
+}
+
+impl Rule<MarkdownNode> for BlockQuote {
+    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+        // group 2 for >>> and group 3 for >
+        let single_line = captures.pos(2).is_none();
+        if single_line {
+            // group 4 excludes the leading >, which prevents infinite loops
+            let (start, end) = captures.pos(4).unwrap();
+            ParseSpec::create_terminal(
+                Some(MarkdownNode::SingleBlockQuote(vec![std::rc::Rc::new(
+                    std::sync::RwLock::new(MarkdownNode::Text(captures.at(3).unwrap().into())),
+                )])),
+                start,
+                end,
+            )
+        } else {
+            let (start, end) = captures.pos(2).unwrap();
+            ParseSpec::create_nonterminal(Some(MarkdownNode::BlockQuote(Vec::new())), start, end)
+        }
+    }
+
+    fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
+        BLOCK_QUOTE.captures(src)
+    }
+
+    fn name(&self) -> String {
+        "Block Quote".to_owned()
     }
 }

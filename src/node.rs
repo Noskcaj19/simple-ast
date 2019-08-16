@@ -18,6 +18,8 @@ pub enum MarkdownNode {
     InlineCode(String),
     Code(String, String),
     Spoiler(Vec<NodeType>),
+    SingleBlockQuote(Vec<NodeType>),
+    BlockQuote(Vec<NodeType>),
 }
 
 impl Node<MarkdownNode> for MarkdownNode {
@@ -31,6 +33,8 @@ impl Node<MarkdownNode> for MarkdownNode {
             MarkdownNode::InlineCode(_) => None,
             MarkdownNode::Code(_, _) => None,
             MarkdownNode::Spoiler(children) => Some(children),
+            MarkdownNode::BlockQuote(children) => Some(children),
+            MarkdownNode::SingleBlockQuote(children) => Some(children),
         }
     }
 
@@ -44,6 +48,8 @@ impl Node<MarkdownNode> for MarkdownNode {
             MarkdownNode::InlineCode(_) => {}
             MarkdownNode::Code(_, _) => {}
             MarkdownNode::Spoiler(ref mut children) => children.push(child),
+            MarkdownNode::BlockQuote(ref mut children) => children.push(child),
+            MarkdownNode::SingleBlockQuote(ref mut children) => children.push(child),
         }
     }
 }
@@ -79,6 +85,14 @@ impl MarkdownNode {
             Text(string) => string.to_owned(),
             InlineCode(string) => format!("`{}`", string),
             Code(language, string) => format!("```{}\n{}```", language, string),
+            SingleBlockQuote(styles) => format!(
+                "> {}",
+                MarkdownNode::collect(styles)
+                    .lines()
+                    .collect::<Vec<_>>()
+                    .join("\n> ")
+            ),
+            BlockQuote(styles) => format!(">>> {}", MarkdownNode::collect(styles)),
         }
     }
 }
