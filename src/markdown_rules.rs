@@ -227,16 +227,44 @@ impl Rule<MarkdownNode> for BlockQuote {
         if single_line {
             // group 4 excludes the leading >, which prevents infinite loops
             let (start, end) = captures.pos(4).unwrap();
-            ParseSpec::create_terminal(
-                Some(MarkdownNode::SingleBlockQuote(vec![std::rc::Rc::new(
-                    std::sync::RwLock::new(MarkdownNode::Text(captures.at(3).unwrap().into())),
-                )])),
-                start,
-                end,
-            )
+            let content = captures.at(3).unwrap().to_owned();
+
+            let multi_line = content.contains('\n');
+            if multi_line {
+                ParseSpec::create_terminal(
+                    Some(MarkdownNode::SingleBlockQuote(vec![std::rc::Rc::new(
+                        std::sync::RwLock::new(MarkdownNode::Text(content)),
+                    )])),
+                    start,
+                    end,
+                )
+            } else {
+                ParseSpec::create_nonterminal(
+                    Some(MarkdownNode::SingleBlockQuote(Vec::new())),
+                    start,
+                    end,
+                )
+            }
         } else {
             let (start, end) = captures.pos(2).unwrap();
-            ParseSpec::create_nonterminal(Some(MarkdownNode::BlockQuote(Vec::new())), start, end)
+            let content = captures.at(2).unwrap().to_owned();
+
+            let multi_line = content.contains('\n');
+            if multi_line {
+                ParseSpec::create_terminal(
+                    Some(MarkdownNode::BlockQuote(vec![std::rc::Rc::new(
+                        std::sync::RwLock::new(MarkdownNode::Text(content)),
+                    )])),
+                    start,
+                    end,
+                )
+            } else {
+                ParseSpec::create_nonterminal(
+                    Some(MarkdownNode::BlockQuote(Vec::new())),
+                    start,
+                    end,
+                )
+            }
         }
     }
 

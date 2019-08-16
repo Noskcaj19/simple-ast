@@ -11,6 +11,7 @@ fn main() {
         &Italic,
         &Strikethrough,
         &Spoiler,
+        &BlockQuote,
         &Code,
         &InlineCode,
         &Text,
