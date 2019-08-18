@@ -1,6 +1,7 @@
 use crate::regex::{Captures, Regex};
 use crate::{MarkdownNode, ParseSpec, Rule};
 use lazy_static::lazy_static;
+use std::cell::RefCell;
 
 macro_rules! styles {
     ( $( $style:ident ),* $(,)? ) => {
@@ -21,7 +22,18 @@ styles! {
     InlineCode,
     Code,
     Spoiler,
-    BlockQuote,
+}
+
+pub struct BlockQuote {
+    in_quote: RefCell<bool>,
+}
+
+impl BlockQuote {
+    pub fn new() -> BlockQuote {
+        BlockQuote {
+            in_quote: RefCell::new(false),
+        }
+    }
 }
 
 lazy_static! {
@@ -59,7 +71,7 @@ lazy_static! {
 }
 
 impl Rule<MarkdownNode> for Escape {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         let text = captures.at(1).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::Text(text.to_owned())), start, end)
@@ -75,7 +87,7 @@ impl Rule<MarkdownNode> for Escape {
 }
 
 impl Rule<MarkdownNode> for Newline {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(0).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::Text("\n".to_owned())), start, end)
     }
@@ -90,7 +102,7 @@ impl Rule<MarkdownNode> for Newline {
 }
 
 impl Rule<MarkdownNode> for Bold {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Bold(Vec::new())), start, end)
     }
@@ -105,7 +117,7 @@ impl Rule<MarkdownNode> for Bold {
 }
 
 impl Rule<MarkdownNode> for Underline {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Underline(vec![])), start, end)
     }
@@ -120,7 +132,7 @@ impl Rule<MarkdownNode> for Underline {
 }
 
 impl Rule<MarkdownNode> for Italic {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = match captures.pos(1) {
             Some(pos) => pos,
             None => captures.pos(2).unwrap(),
@@ -138,7 +150,7 @@ impl Rule<MarkdownNode> for Italic {
 }
 
 impl Rule<MarkdownNode> for Strikethrough {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Strikethrough(vec![])), start, end)
     }
@@ -153,7 +165,7 @@ impl Rule<MarkdownNode> for Strikethrough {
 }
 
 impl Rule<MarkdownNode> for Text {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(0).unwrap();
         let text = captures.at(0).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::Text(text.to_owned())), start, end)
@@ -169,7 +181,7 @@ impl Rule<MarkdownNode> for Text {
 }
 
 impl Rule<MarkdownNode> for InlineCode {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(2).unwrap();
         let text = captures.at(3).unwrap();
         ParseSpec::create_terminal(Some(MarkdownNode::InlineCode(text.to_owned())), start, end)
@@ -185,7 +197,7 @@ impl Rule<MarkdownNode> for InlineCode {
 }
 
 impl Rule<MarkdownNode> for Code {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         let language = captures.at(3).unwrap_or("");
         let text = captures.at(4).unwrap();
@@ -206,7 +218,7 @@ impl Rule<MarkdownNode> for Code {
 }
 
 impl Rule<MarkdownNode> for Spoiler {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         let (start, end) = captures.pos(1).unwrap();
         ParseSpec::create_nonterminal(Some(MarkdownNode::Spoiler(Vec::new())), start, end)
     }
@@ -221,50 +233,36 @@ impl Rule<MarkdownNode> for Spoiler {
 }
 
 impl Rule<MarkdownNode> for BlockQuote {
-    fn parse(&self, captures: Captures) -> ParseSpec<MarkdownNode> {
+    fn accept_match(&self, last_capture: Option<&str>) -> bool {
+        match last_capture {
+            Some(last_capture) => {
+                if last_capture.ends_with('\n') {
+                    !*self.in_quote.borrow()
+                } else {
+                    false
+                }
+            }
+            None => true,
+        }
+    }
+
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
         // group 2 for >>> and group 3 for >
+        *self.in_quote.borrow_mut() = true;
         let single_line = captures.pos(2).is_none();
         if single_line {
             // group 4 excludes the leading >, which prevents infinite loops
             let (start, end) = captures.pos(4).unwrap();
-            let content = captures.at(3).unwrap().to_owned();
 
-            let multi_line = content.contains('\n');
-            if multi_line {
-                ParseSpec::create_terminal(
-                    Some(MarkdownNode::SingleBlockQuote(vec![std::rc::Rc::new(
-                        std::sync::RwLock::new(MarkdownNode::Text(content)),
-                    )])),
-                    start,
-                    end,
-                )
-            } else {
-                ParseSpec::create_nonterminal(
-                    Some(MarkdownNode::SingleBlockQuote(Vec::new())),
-                    start,
-                    end,
-                )
-            }
+            ParseSpec::create_nonterminal(
+                Some(MarkdownNode::SingleBlockQuote(Vec::new())),
+                start,
+                end,
+            )
         } else {
             let (start, end) = captures.pos(2).unwrap();
-            let content = captures.at(2).unwrap().to_owned();
 
-            let multi_line = content.contains('\n');
-            if multi_line {
-                ParseSpec::create_terminal(
-                    Some(MarkdownNode::BlockQuote(vec![std::rc::Rc::new(
-                        std::sync::RwLock::new(MarkdownNode::Text(content)),
-                    )])),
-                    start,
-                    end,
-                )
-            } else {
-                ParseSpec::create_nonterminal(
-                    Some(MarkdownNode::BlockQuote(Vec::new())),
-                    start,
-                    end,
-                )
-            }
+            ParseSpec::create_nonterminal(Some(MarkdownNode::BlockQuote(Vec::new())), start, end)
         }
     }
 

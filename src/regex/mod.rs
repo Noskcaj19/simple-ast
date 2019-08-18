@@ -14,7 +14,11 @@ pub struct Regex {
 impl Regex {
     pub fn new(pattern: &str) -> Result<Regex, Error> {
         #[cfg(not(feature = "pcre"))]
-        let regex = oniguruma::Regex::new(pattern);
+        let regex = oniguruma::Regex::with_options(
+            pattern,
+            oniguruma::RegexOptions::REGEX_OPTION_NONE,
+            oniguruma::Syntax::perl(),
+        );
         #[cfg(feature = "pcre")]
         let regex = pcre2::bytes::RegexBuilder::new().utf(true).build(pattern);
 

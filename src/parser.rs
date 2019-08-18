@@ -7,9 +7,9 @@ pub struct Parser<'r, T: Node<T>> {
 }
 
 #[derive(Debug)]
-pub struct Styled<T: Node<T>>(pub Vec<Rc<RwLock<T>>>);
+pub struct Styled<T: Node<T> + std::fmt::Debug>(pub Vec<Rc<RwLock<T>>>);
 
-impl<'r, T: Node<T>> Parser<'r, T> {
+impl<'r, T: Node<T> + std::fmt::Debug> Parser<'r, T> {
     pub fn with_rules(rules: &'r [&'r dyn Rule<T>]) -> Parser<'r, T> {
         Parser { rules }
     }
@@ -21,6 +21,8 @@ impl<'r, T: Node<T>> Parser<'r, T> {
         if !src.is_empty() {
             remaining_parses.push(ParseSpec::create_nonterminal(None, 0, src.len()));
         }
+
+        let mut last_capture = None;
 
         while !remaining_parses.is_empty() {
             let mut builder = remaining_parses
@@ -37,9 +39,12 @@ impl<'r, T: Node<T>> Parser<'r, T> {
             for rule in self.rules {
                 let captures = rule.captures(inspection_source);
                 if let Some(matcher) = captures {
+                    if !rule.accept_match(last_capture) {
+                        continue;
+                    }
                     let matcher_source_end = matcher.pos(0).unwrap().1 + offset;
 
-                    let mut new_builder = rule.parse(matcher);
+                    let mut new_builder = rule.parse(&matcher);
                     let parent = &mut builder.root;
 
                     if let Some(it) = new_builder.root.clone() {
@@ -68,6 +73,8 @@ impl<'r, T: Node<T>> Parser<'r, T> {
                         new_builder.apply_offset(offset);
                         remaining_parses.push(new_builder);
                     }
+
+                    last_capture = matcher.at(0);
                     break;
                 }
             }
