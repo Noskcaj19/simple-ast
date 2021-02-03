@@ -20,6 +20,10 @@ pub enum MarkdownNode {
     Spoiler(Vec<NodeType>),
     SingleBlockQuote(Vec<NodeType>),
     BlockQuote(Vec<NodeType>),
+    UserMention(u64),
+    ChannelMention(u64),
+    Emoji(String, u64),
+    RoleMention(u64),
 }
 
 impl Node<MarkdownNode> for MarkdownNode {
@@ -35,6 +39,10 @@ impl Node<MarkdownNode> for MarkdownNode {
             MarkdownNode::Spoiler(children) => Some(children),
             MarkdownNode::BlockQuote(children) => Some(children),
             MarkdownNode::SingleBlockQuote(children) => Some(children),
+            MarkdownNode::UserMention(_) => None,
+            MarkdownNode::ChannelMention(_) => None,
+            MarkdownNode::Emoji(_, _) => None,
+            MarkdownNode::RoleMention(_) => None,
         }
     }
 
@@ -50,6 +58,10 @@ impl Node<MarkdownNode> for MarkdownNode {
             MarkdownNode::Spoiler(ref mut children) => children.push(child),
             MarkdownNode::BlockQuote(ref mut children) => children.push(child),
             MarkdownNode::SingleBlockQuote(ref mut children) => children.push(child),
+            MarkdownNode::UserMention(_) => {}
+            MarkdownNode::ChannelMention(_) => {}
+            MarkdownNode::Emoji(_, _) => {}
+            MarkdownNode::RoleMention(_) => {}
         }
     }
 }
@@ -93,6 +105,18 @@ impl MarkdownNode {
                     .join("\n> ")
             ),
             BlockQuote(styles) => format!(">>> {}", MarkdownNode::collect(styles)),
+            UserMention(id) => {
+                format!("<@{}>", id)
+            }
+            ChannelMention(id) => {
+                format!("<#{}>", id)
+            }
+            Emoji(name, id) => {
+                format!("<:{}:{}>", name, id)
+            }
+            RoleMention(id) => {
+                format!("<@&{}>", id)
+            }
         }
     }
 }

@@ -22,6 +22,10 @@ styles! {
     InlineCode,
     Code,
     Spoiler,
+    Emoji,
+    ChannelMention,
+    UserMention,
+    RoleMention,
 }
 
 pub struct BlockQuote {
@@ -68,6 +72,10 @@ lazy_static! {
     ).unwrap();
     static ref SPOILER: Regex = Regex::new(r"^\|\|([\s\S]+?)\|\|").unwrap();
     static ref BLOCK_QUOTE: Regex = Regex::new(r"^( *>>> +([\s\S]*))|^( *>(?!>>) +([^\n]*(\n *>(?!>>) +[^\n]*)*\n?))").unwrap();
+    static ref CHANNEL_MENTION: Regex = Regex::new(r"^<#(\d+?)>").unwrap();
+    static ref ROLE_MENTION: Regex = Regex::new(r"^<@&(\d+?)>").unwrap();
+    static ref EMOJI: Regex = Regex::new(r"^<a?:(.+?):(\d+?)>").unwrap();
+    static ref USER_MENTION: Regex = Regex::new(r"^<@!?(\d+?)>").unwrap();
 }
 
 impl Rule<MarkdownNode> for Escape {
@@ -274,3 +282,90 @@ impl Rule<MarkdownNode> for BlockQuote {
         "Block Quote".to_owned()
     }
 }
+
+impl Rule<MarkdownNode> for UserMention {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
+        let (start, end) = captures.pos(1).unwrap();
+        ParseSpec::create_terminal(
+            Some(MarkdownNode::UserMention(
+                captures.at(1).and_then(|id| id.parse().ok()).unwrap(),
+            )),
+            start,
+            end,
+        )
+    }
+
+    fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
+        USER_MENTION.captures(src)
+    }
+
+    fn name(&self) -> String {
+        "User Mention".to_owned()
+    }
+}
+
+impl Rule<MarkdownNode> for ChannelMention {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
+        let (start, end) = captures.pos(1).unwrap();
+        ParseSpec::create_terminal(
+            Some(MarkdownNode::ChannelMention(
+                captures.at(1).and_then(|id| id.parse().ok()).unwrap(),
+            )),
+            start,
+            end,
+        )
+    }
+
+    fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
+        CHANNEL_MENTION.captures(src)
+    }
+
+    fn name(&self) -> String {
+        "Channel Mention".to_owned()
+    }
+}
+
+impl Rule<MarkdownNode> for RoleMention {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
+        let (start, end) = captures.pos(1).unwrap();
+        ParseSpec::create_terminal(
+            Some(MarkdownNode::RoleMention(
+                captures.at(1).and_then(|id| id.parse().ok()).unwrap(),
+            )),
+            start,
+            end,
+        )
+    }
+
+    fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
+        ROLE_MENTION.captures(src)
+    }
+
+    fn name(&self) -> String {
+        "Role Mention".to_owned()
+    }
+}
+
+impl Rule<MarkdownNode> for Emoji {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
+        let (start, _) = captures.pos(1).unwrap();
+        let (_, end) = captures.pos(2).unwrap();
+        ParseSpec::create_terminal(
+            Some(MarkdownNode::Emoji(
+                captures.at(1).unwrap().to_owned(),
+                captures.at(2).and_then(|id| id.parse().ok()).unwrap(),
+            )),
+            start,
+            end,
+        )
+    }
+
+    fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
+        EMOJI.captures(src)
+    }
+
+    fn name(&self) -> String {
+        "Emoji".to_owned()
+    }
+}
+
