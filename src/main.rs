@@ -7,6 +7,7 @@ fn main() {
         &Escape,
         &Newline,
         &Emoji,
+        &Timestamp,
         &ChannelMention,
         &UserMention,
         &RoleMention,

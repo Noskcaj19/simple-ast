@@ -26,6 +26,7 @@ styles! {
     ChannelMention,
     UserMention,
     RoleMention,
+    Timestamp,
 }
 
 pub struct BlockQuote {
@@ -76,6 +77,7 @@ lazy_static! {
     static ref ROLE_MENTION: Regex = Regex::new(r"^<@&(\d+?)>").unwrap();
     static ref EMOJI: Regex = Regex::new(r"^<a?:(.+?):(\d+?)>").unwrap();
     static ref USER_MENTION: Regex = Regex::new(r"^<@!?(\d+?)>").unwrap();
+    static ref TIMESTAMP: Regex = Regex::new(r"^<t:(-?\d{1,17})(?::(t|T|d|D|f|F|R))?>").unwrap();
 }
 
 impl Rule<MarkdownNode> for Escape {
@@ -306,6 +308,25 @@ impl Rule<MarkdownNode> for Emoji {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         EMOJI.captures(src)
+    }
+}
+
+
+impl Rule<MarkdownNode> for Timestamp {
+    fn parse(&self, captures: &Captures) -> ParseSpec<MarkdownNode> {
+        let (start, end) = captures.pos(0).unwrap();
+        ParseSpec::create_terminal(
+            Some(MarkdownNode::Timestamp(
+                captures.at(1).unwrap().to_owned().parse().unwrap(),
+                captures.at(2).and_then(|c| c.chars().next()),
+            )),
+            start,
+            end,
+        )
+    }
+
+    fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
+        TIMESTAMP.captures(src)
     }
 }
 

@@ -24,6 +24,7 @@ pub enum MarkdownNode {
     ChannelMention(u64),
     Emoji(String, u64),
     RoleMention(u64),
+    Timestamp(i64, Option<char>)
 }
 
 impl Node<MarkdownNode> for MarkdownNode {
@@ -43,6 +44,7 @@ impl Node<MarkdownNode> for MarkdownNode {
             MarkdownNode::ChannelMention(_) => None,
             MarkdownNode::Emoji(_, _) => None,
             MarkdownNode::RoleMention(_) => None,
+            MarkdownNode::Timestamp(_, _) => None,
         }
     }
 
@@ -62,6 +64,7 @@ impl Node<MarkdownNode> for MarkdownNode {
             MarkdownNode::ChannelMention(_) => {}
             MarkdownNode::Emoji(_, _) => {}
             MarkdownNode::RoleMention(_) => {}
+            MarkdownNode::Timestamp(_, _) => {}
         }
     }
 }
@@ -116,6 +119,12 @@ impl MarkdownNode {
             }
             RoleMention(id) => {
                 format!("<@&{}>", id)
+            }
+            Timestamp(time, style) => {
+                match style {
+                    Some(style) => format!("<t:{}:{}>", time, style),
+                    None => format!("<t:{}>", time),
+                }
             }
         }
     }
