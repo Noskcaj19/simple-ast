@@ -88,10 +88,6 @@ impl Rule<MarkdownNode> for Escape {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         ESCAPE.captures(src)
     }
-
-    fn name(&self) -> String {
-        "Escape".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for Newline {
@@ -102,10 +98,6 @@ impl Rule<MarkdownNode> for Newline {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         NEWLINE.captures(src)
-    }
-
-    fn name(&self) -> String {
-        "Newline".to_owned()
     }
 }
 
@@ -118,10 +110,6 @@ impl Rule<MarkdownNode> for Bold {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         BOLD.captures(src)
     }
-
-    fn name(&self) -> String {
-        "Bold".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for Underline {
@@ -132,10 +120,6 @@ impl Rule<MarkdownNode> for Underline {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         UNDERLINE.captures(&src)
-    }
-
-    fn name(&self) -> String {
-        "Underline".to_owned()
     }
 }
 
@@ -151,10 +135,6 @@ impl Rule<MarkdownNode> for Italic {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         ITALICS.captures(&src)
     }
-
-    fn name(&self) -> String {
-        "Italic".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for Strikethrough {
@@ -165,10 +145,6 @@ impl Rule<MarkdownNode> for Strikethrough {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         STRIKETHROUGH.captures(&src)
-    }
-
-    fn name(&self) -> String {
-        "Strikethrough".to_owned()
     }
 }
 
@@ -182,10 +158,6 @@ impl Rule<MarkdownNode> for Text {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         TEXT.captures(src)
     }
-
-    fn name(&self) -> String {
-        "Text".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for InlineCode {
@@ -197,10 +169,6 @@ impl Rule<MarkdownNode> for InlineCode {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         INLINE_CODE.captures(src)
-    }
-
-    fn name(&self) -> String {
-        "Inline Code".to_owned()
     }
 }
 
@@ -219,10 +187,6 @@ impl Rule<MarkdownNode> for Code {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         CODE.captures(src)
     }
-
-    fn name(&self) -> String {
-        "Code".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for Spoiler {
@@ -233,10 +197,6 @@ impl Rule<MarkdownNode> for Spoiler {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         SPOILER.captures(src)
-    }
-
-    fn name(&self) -> String {
-        "Spoiler".to_owned()
     }
 }
 
@@ -277,10 +237,6 @@ impl Rule<MarkdownNode> for BlockQuote {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         BLOCK_QUOTE.captures(src)
     }
-
-    fn name(&self) -> String {
-        "Block Quote".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for UserMention {
@@ -297,10 +253,6 @@ impl Rule<MarkdownNode> for UserMention {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         USER_MENTION.captures(src)
-    }
-
-    fn name(&self) -> String {
-        "User Mention".to_owned()
     }
 }
 
@@ -319,10 +271,6 @@ impl Rule<MarkdownNode> for ChannelMention {
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         CHANNEL_MENTION.captures(src)
     }
-
-    fn name(&self) -> String {
-        "Channel Mention".to_owned()
-    }
 }
 
 impl Rule<MarkdownNode> for RoleMention {
@@ -339,10 +287,6 @@ impl Rule<MarkdownNode> for RoleMention {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         ROLE_MENTION.captures(src)
-    }
-
-    fn name(&self) -> String {
-        "Role Mention".to_owned()
     }
 }
 
@@ -362,10 +306,6 @@ impl Rule<MarkdownNode> for Emoji {
 
     fn captures<'a>(&self, src: &'a str) -> Option<Captures<'a>> {
         EMOJI.captures(src)
-    }
-
-    fn name(&self) -> String {
-        "Emoji".to_owned()
     }
 }
 
